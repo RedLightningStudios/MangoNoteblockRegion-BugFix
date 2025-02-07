@@ -22,6 +22,7 @@ NoteBlockAPI (1.6.1 or above) (Click Here)​
 
 Commands & Permissions
 /cytnoteblockregion reload or /cyt reload for short.
+
 Permission: cytnoteblockregion.reload
 
 Configuration
