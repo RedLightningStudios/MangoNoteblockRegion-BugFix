@@ -4,6 +4,7 @@ import com.lukemango.cytnoteblockregion.CYTNoteblockRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,8 @@ public class MusicManager {
         this.plugin = plugin;
         this.musicRegister = new MusicRegister(this);
 
-        musicRegister.loadSongs();
-        musicRegister.loadRegions();
+        loadSongs();
+        loadRegions();
 
         plugin.getWorldGuardUtil().startCheckingPlayers();
     }
@@ -40,5 +41,22 @@ public class MusicManager {
 
     public Map<ProtectedRegion, RadioSongPlayer> getRegionSongs() {
         return regionSongs;
+    }
+
+    public void reloadSongs() {
+        songs.clear();
+        regionSongs.clear();
+        loadSongs();
+        loadRegions();
+    }
+
+    private void loadSongs() {
+        // Implementation to load songs
+        musicRegister.loadSongs();
+    }
+
+    private void loadRegions() {
+        // Implementation to load regions and associate them with songs
+        musicRegister.loadRegions();
     }
 }
