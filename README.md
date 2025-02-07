@@ -21,7 +21,8 @@ WorldGuard (7.0.7 or above)
 NoteBlockAPI (1.6.1 or above) (Click Here)​
 
 Commands & Permissions
-None. Literally nothing, sorry.​
+/cytnoteblockregion reload or /cyt reload for short.
+Permission: cytnoteblockregion.reload
 
 Configuration
 A default configuration can be found here.
