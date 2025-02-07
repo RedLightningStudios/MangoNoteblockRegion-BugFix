@@ -1,0 +1,10 @@
+regions:
+  world:
+    region1:
+      songs:
+        - song1
+        - song2
+      volume: 100
+      shuffle: false
+      loop: true
+      tick: 10
