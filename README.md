@@ -3,6 +3,9 @@
 
 This is a fix for a plugin created by lukemango fixing the music not playing while standing in multiple regions, it adds priority support, and allows reloading the config via a command.
 
+Known Bugs:
+Songs do not stop playing after reloading the config if the song was changed (Even if you leave the region). Planning to address this soon.
+
 Original Description (modified to support the changes):
 This plugin was originally made by me for my server because I couldn't find anything similar on Spigot and it was fairly easy to make, therefore here it is for you to use
 
