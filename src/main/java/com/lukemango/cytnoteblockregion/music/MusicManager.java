@@ -4,7 +4,6 @@ import com.lukemango.cytnoteblockregion.CYTNoteblockRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +43,11 @@ public class MusicManager {
     }
 
     public void reloadSongs() {
+        // Stop all currently playing songs
+        for (RadioSongPlayer songPlayer : regionSongs.values()) {
+            songPlayer.setPlaying(false);
+        }
+
         songs.clear();
         regionSongs.clear();
         loadSongs();
