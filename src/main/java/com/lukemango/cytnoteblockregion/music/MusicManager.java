@@ -63,4 +63,8 @@ public class MusicManager {
         // Implementation to load regions and associate them with songs
         musicRegister.loadRegions();
     }
+
+    public MusicRegister getMusicRegister() {
+        return musicRegister;
+    }
 }
