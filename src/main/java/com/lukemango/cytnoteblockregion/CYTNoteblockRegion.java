@@ -12,13 +12,15 @@ public final class CYTNoteblockRegion extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-
         saveDefaultConfig();
         worldGuardUtil = new WorldGuardUtil(this);
         musicManager = new MusicManager(this);
 
-        // Register reload command
+        // Register WorldLoad listener
+        getServer().getPluginManager().registerEvents(
+            new com.lukemango.cytnoteblockregion.listeners.WorldListener(this), this
+        );
+
         getCommand("cytnoteblockregion").setExecutor(new ReloadCommand(this));
     }
 
