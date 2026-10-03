@@ -10,6 +10,7 @@ import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
@@ -39,6 +40,7 @@ public class MusicRegister {
 
         if (musicFolder.listFiles() == null) {
             plugin.getLogger().log(SEVERE, "No music files found!");
+            return;
         }
 
         for (File file : musicFolder.listFiles()) {
@@ -55,56 +57,65 @@ public class MusicRegister {
 
     public void loadRegions() {
         final FileConfiguration config = plugin.getConfig();
-        final Set<String> worldSet = config.getConfigurationSection("regions").getKeys(false);
+        if (config.getConfigurationSection("regions") == null) return;
 
+        final Set<String> worldSet = config.getConfigurationSection("regions").getKeys(false);
         plugin.getLogger().log(INFO, "Loading regions...");
 
-        for (String world : worldSet) {
-            if (Bukkit.getWorld(world) == null) {
-                plugin.getLogger().warning("World " + world + " does not exist!");
+        for (String worldName : worldSet) {
+            loadWorldRegions(worldName);
+        }
+        plugin.getLogger().log(INFO, "Loaded " + musicManager.getRegionSongs().size() + " regions!");
+    }
+
+    public void loadWorldRegions(String worldName) {
+        World bukkitWorld = Bukkit.getWorld(worldName);
+        if (bukkitWorld == null) {
+            plugin.getLogger().warning("World " + worldName + " is not loaded yet. Skipping region setup until loaded.");
+            return;
+        }
+
+        final FileConfiguration config = plugin.getConfig();
+        if (!config.contains("regions." + worldName)) return;
+
+        final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        Set<String> regionSet = config.getConfigurationSection("regions." + worldName).getKeys(false);
+
+        for (String region : regionSet) {
+            com.sk89q.worldedit.world.World wgWorld = BukkitAdapter.adapt(bukkitWorld);
+            RegionManager regionList = container.get(wgWorld);
+
+            if (regionList == null) {
+                plugin.getLogger().warning("WorldGuard region manager for world " + worldName + " is null!");
                 continue;
             }
 
-            final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            final Set<String> regionSet = config.getConfigurationSection("regions." + world).getKeys(false);
-
-            for (String region : regionSet) {
-                plugin.getLogger().log(INFO, "Loading region " + region + " in world " + world + "...");
-
-                com.sk89q.worldedit.world.World wgWorld = BukkitAdapter.adapt(Bukkit.getWorld(world));
-                RegionManager regionList = container.get(wgWorld);
-                ProtectedRegion rg = regionList.getRegion(region);
-
-                if (rg == null) {
-                    plugin.getLogger().warning("Region " + region + " does not exist!");
-                    continue;
-                }
-
-                final List<String> regionSongs = config.getStringList("regions." + world + "." + region + ".songs");
-                final List<Song> songs = new ArrayList<>();
-
-                for (String song : regionSongs) {
-                    if (musicManager.getSongs().containsKey(song)) {
-                        songs.add(musicManager.getSongs().get(song));
-                    } else {
-                        plugin.getLogger().warning("Song " + song + " does not exist!");
-                    }
-                }
-
-                if (!musicManager.getRegionSongs().containsKey(rg)) {
-                    musicManager.getRegionSongs().put(rg, new RadioSongPlayer(songs.get(0)));
-                } else {
-                    musicManager.getRegionSongs().replace(rg, new RadioSongPlayer(songs.get(0)));
-                }
-
-                musicManager.getRegionSongs().get(rg).setAutoDestroy(false);
-                musicManager.getRegionSongs().get(rg).setPlaying(true);
-                musicManager.getRegionSongs().get(rg).setLoop(config.getBoolean("regions." + world + "." + region + ".loop"));
-                musicManager.getRegionSongs().get(rg).setRandom(config.getBoolean("regions." + world + "." + region + ".shuffle"));
-                musicManager.getRegionSongs().get(rg).setVolume((byte) config.getInt("regions." + world + "." + region + ".volume"));
-                musicManager.getRegionSongs().get(rg).setTick((short) config.getInt("regions." + world + "." + region + ".tick"));
+            ProtectedRegion rg = regionList.getRegion(region);
+            if (rg == null) {
+                plugin.getLogger().warning("Region " + region + " does not exist in world " + worldName + "!");
+                continue;
             }
+
+            List<String> regionSongs = config.getStringList("regions." + worldName + "." + region + ".songs");
+            List<Song> songs = new ArrayList<>();
+
+            for (String song : regionSongs) {
+                if (musicManager.getSongs().containsKey(song)) {
+                    songs.add(musicManager.getSongs().get(song));
+                } else {
+                    plugin.getLogger().warning("Song " + song + " does not exist!");
+                }
+            }
+
+            if (songs.isEmpty()) continue;
+
+            RadioSongPlayer player = musicManager.getRegionSongs().computeIfAbsent(rg, k -> new RadioSongPlayer(songs.get(0)));
+            player.setAutoDestroy(false);
+            player.setPlaying(true);
+            player.setLoop(config.getBoolean("regions." + worldName + "." + region + ".loop"));
+            player.setRandom(config.getBoolean("regions." + worldName + "." + region + ".shuffle"));
+            player.setVolume((byte) config.getInt("regions." + worldName + "." + region + ".volume"));
+            player.setTick((short) config.getInt("regions." + worldName + "." + region + ".tick"));
         }
-        plugin.getLogger().log(INFO, "Loaded " + musicManager.getRegionSongs().size() + " regions!");
     }
 }
